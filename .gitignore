@@ -1,0 +1,5 @@
+# Directories
+data
+
+# Jupyter Stuff
+*.ipynb
