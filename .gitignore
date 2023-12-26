@@ -1,5 +1,9 @@
 # Directories
 data
+venv
 
 # Jupyter Stuff
 *.ipynb
+
+# Python Stuff
+.DS_Store
