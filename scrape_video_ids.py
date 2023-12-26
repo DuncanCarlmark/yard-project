@@ -1,25 +1,48 @@
-import requests
-from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+import time
+
+
+
+options=Options()
+options.add_argument("start-maximized")
 
 # URL of the YouTube channel
-channel_url = "https://www.youtube.com/c/@TheYardPodcast/videos"
+channel_url = "https://www.youtube.com/@TheYardPodcast/videos"
 
-# Send an HTTP GET request to the channel URL
-response = requests.get(channel_url)
-print(response)
-print(response.text)
+# Path to the Chrome WebDriver executable
+driver_path = "chromedriver.exe"  # Change this to the actual name of the WebDriver
 
-# Parse the HTML content of the response
-soup = BeautifulSoup(response.text, "html.parser")
+# Create a Chrome WebDriver instance
+driver = webdriver.Chrome()
 
-# Find all video elements using their class name
-video_elements = soup.find_all("a", class_="yt-simple-endpoint style-scope ytd-grid-video-renderer")
+# Open the channel URL
+driver.get(channel_url)
 
-# Extract video IDs from the href attribute
-video_ids = [video["href"].split("v=")[1] for video in video_elements if "v=" in video["href"]]
+# Wait for the page to load (adjust the wait time as needed)
+driver.implicitly_wait(100)
+
+# Scroll down to load more videos (repeat this step as needed)
+# You might need to adjust the number of scrolls based on the channel's layout
+num_scrolls = 6
+for x in range(num_scrolls):
+
+    time.sleep(5)
+    height = driver.execute_script("return document.documentElement.scrollHeight")
+    driver.execute_script("window.scrollTo(0, " + str(height) + ");")
+    
+    print(x)
+
+
+# Find video elements by CSS selector
+video_elements = driver.find_elements(By.ID, "video-title-link")
+
+# Extract video IDs
+video_ids = [video.get_attribute("href").split("v=")[1] for video in video_elements if "v=" in video.get_attribute("href")]
 
 # Path to the output file
-output_file_path = "video_ids.txt"
+output_file_path = "data/video_ids.txt"
 
 # Save the video IDs to a text file
 with open(output_file_path, "w") as output_file:
@@ -27,3 +50,6 @@ with open(output_file_path, "w") as output_file:
         output_file.write(video_id + "\n")
 
 print("Video IDs saved to", output_file_path)
+
+# Close the WebDriver
+driver.quit()
